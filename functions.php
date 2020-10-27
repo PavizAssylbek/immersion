@@ -1,4 +1,5 @@
 <?php
+
 function get_user_by_email($email) {
     $pdo = new PDO("mysql:host=localhost;dbname=immersion", "root", "root");
     $sql = "SELECT * FROM users WHERE email=:email";
@@ -14,7 +15,7 @@ function add_user($email, $password) {
     $statement = $pdo->prepare($sql);
     $statement->execute([
         "email" => $email,
-        "password" => password_hash($password, PASSWORD_DEFAULT)
+        "password" => md5($password)
     ]);
 };
 
@@ -34,4 +35,16 @@ function display_flash_message($key) {
 function redirect_to($path) {
     header("Location:$path");
     exit;
+};
+
+function login($email, $hashed_password) {
+    $pdo = new PDO("mysql:host=localhost;dbname=immersion", "root", "root");
+    $sql = "SELECT * FROM users WHERE email=:email AND password=:password";
+    $statement = $pdo->prepare($sql);
+    $statement->execute([
+        "email" => $email,
+        "password" => $hashed_password
+    ]);
+    $user_exist = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $user_exist;
 };
