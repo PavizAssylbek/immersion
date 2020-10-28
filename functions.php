@@ -15,7 +15,7 @@ function add_user($email, $password) {
     $statement = $pdo->prepare($sql);
     $statement->execute([
         "email" => $email,
-        "password" => md5($password)
+        "password" => password_hash($password, PASSWORD_DEFAULT)
     ]);
 };
 
@@ -37,14 +37,13 @@ function redirect_to($path) {
     exit;
 };
 
-function login($email, $hashed_password) {
+function login($email, $password) {
     $pdo = new PDO("mysql:host=localhost;dbname=immersion", "root", "root");
-    $sql = "SELECT * FROM users WHERE email=:email AND password=:password";
+    $sql = "SELECT * FROM users WHERE email=:email";
     $statement = $pdo->prepare($sql);
-    $statement->execute([
-        "email" => $email,
-        "password" => $hashed_password
-    ]);
-    $user_exist = $statement->fetchAll(PDO::FETCH_ASSOC);
-    return $user_exist;
+    $statement->execute(["email" => $email,]);
+    $user = $statement->fetchAll(PDO::FETCH_ASSOC);
+    $user_password = $user[0]['password'];
+    $password_verify = password_verify($password, $user_password);
+    return $password_verify;
 };
